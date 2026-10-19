@@ -52,6 +52,7 @@ import tradesRouter from './trades/trades.routes';
 import tradersRouter from './traders/traders.routes';
 import nonceRouter from './nonce/nonce.routes';
 import swapsRouter from './swaps/swaps.routes';
+import milestonesRouter from './keys/milestones.routes';
 
 import { BASE as CREATORS_BASE } from '../constants/creator.constants';
 
@@ -94,9 +95,9 @@ router.use('/keys', routeBodySizeLimit('default'), freezeRouter);
 router.use('/cooldowns', routeBodySizeLimit('default'), cooldownRouter);
 
 router.use(
-  '/notifications',
-  routeBodySizeLimit('default'),
-  notificationsRouter
+   '/notifications',
+   routeBodySizeLimit('default'),
+   notificationsRouter
 );
 router.use('/webhooks', routeBodySizeLimit('default'), horizonWebhookRouter);
 router.use('/vesting', routeBodySizeLimit('default'), vestingRouter);
@@ -116,9 +117,9 @@ router.use('/referrals', routeBodySizeLimit('default'), referralRouter);
 router.use('/contracts', routeBodySizeLimit('default'), contractsRouter);
 router.use('/watchlist', routeBodySizeLimit('default'), watchlistRouter);
 router.use(
-  '/investor/watchlist',
-  routeBodySizeLimit('default'),
-  watchlistRouter
+   '/investor/watchlist',
+   routeBodySizeLimit('default'),
+   watchlistRouter
 );
 router.use('/staking', routeBodySizeLimit('default'), stakingRouter);
 router.use('/sellers', routeBodySizeLimit('default'), sellersRouter);
@@ -133,5 +134,6 @@ router.use('/trades', routeBodySizeLimit('default'), tradesRouter);
 router.use('/traders', routeBodySizeLimit('default'), tradersRouter);
 router.use('/nonce', routeBodySizeLimit('default'), nonceRouter);
 router.use('/swaps', routeBodySizeLimit('default'), swapsRouter);
+router.use('/milestones', routeBodySizeLimit('default'), milestonesRouter);
 
 export default router;

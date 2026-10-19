@@ -25,9 +25,7 @@ import {
 } from './social-metadata-indexer.service';
 
 function isTradeEvent(event: IndexerChainEvent): boolean {
-   return (
-      event.eventType === 'KEY_BOUGHT' || event.eventType === 'KEY_SOLD'
-   );
+   return event.eventType === 'KEY_BOUGHT' || event.eventType === 'KEY_SOLD';
 }
 
 function isGovernanceProposalEvent(event: IndexerChainEvent): boolean {
@@ -367,13 +365,11 @@ export async function processIndexerEvents(
    // TWAP event actually arrives.
    const twapEvents = events.filter(
       event =>
-         event.eventType === 'TWAP_UPDATED' ||
-         event.eventType === 'TWAPUpdated'
+         event.eventType === 'TWAP_UPDATED' || event.eventType === 'TWAPUpdated'
    );
    if (twapEvents.length > 0) {
-      const { processTwapUpdatedEvents } = await import(
-         './twap-indexer.service'
-      );
+      const { processTwapUpdatedEvents } =
+         await import('./twap-indexer.service');
       await processTwapUpdatedEvents(twapEvents);
    }
 
@@ -382,10 +378,47 @@ export async function processIndexerEvents(
    // batch that creates a proposal and records its votes stays consistent.
    const governanceEvents = events.filter(isGovernanceProposalEvent);
    if (governanceEvents.length > 0) {
-      const { processGovernanceProposalEvents } = await import(
-         './governance-proposal-indexer.service'
-      );
+      const { processGovernanceProposalEvents } =
+         await import('./governance-proposal-indexer.service');
       await processGovernanceProposalEvents(governanceEvents);
+   }
+
+   const { CURVE_UPDATE_EVENT_TYPES, processCurveUpdateEvents } =
+      await import('./curve-update-indexer.service');
+   const curveUpdateEvents = events.filter(event =>
+      CURVE_UPDATE_EVENT_TYPES.has(event.eventType)
+   );
+   if (curveUpdateEvents.length > 0) {
+      await processCurveUpdateEvents(curveUpdateEvents);
+   }
+
+   const {
+      MILESTONE_REWARD_CLAIMED_EVENT_TYPES,
+      processMilestoneRewardClaimedEvents,
+   } = await import('./milestone-claim-indexer.service');
+   const milestoneClaimEvents = events.filter(event =>
+      MILESTONE_REWARD_CLAIMED_EVENT_TYPES.has(event.eventType)
+   );
+   if (milestoneClaimEvents.length > 0) {
+      await processMilestoneRewardClaimedEvents(milestoneClaimEvents);
+   }
+
+   const { KEY_RETIREMENT_EVENT_TYPES, processKeyRetirementEvents } =
+      await import('./key-retirement-indexer.service');
+   const retirementEvents = events.filter(event =>
+      KEY_RETIREMENT_EVENT_TYPES.has(event.eventType)
+   );
+   if (retirementEvents.length > 0) {
+      await processKeyRetirementEvents(retirementEvents);
+   }
+
+   const { KEY_LAUNCH_AUCTION_EVENT_TYPES, processKeyLaunchAuctionEvents } =
+      await import('./key-launch-auction-indexer.service');
+   const launchAuctionEvents = events.filter(event =>
+      KEY_LAUNCH_AUCTION_EVENT_TYPES.has(event.eventType)
+   );
+   if (launchAuctionEvents.length > 0) {
+      await processKeyLaunchAuctionEvents(launchAuctionEvents);
    }
 
    if (tradeEvents.length > 0) {
@@ -393,15 +426,13 @@ export async function processIndexerEvents(
    }
 
    if (dividendEvents.length > 0) {
-      const { processDividendEvents } = await import(
-         './dividend-indexer.service'
-      );
+      const { processDividendEvents } =
+         await import('./dividend-indexer.service');
       await processDividendEvents(dividendEvents, { advanceCursor: false });
    }
 
-   const { isLpEventType, processLpEvents } = await import(
-      './lp-indexer.service'
-   );
+   const { isLpEventType, processLpEvents } =
+      await import('./lp-indexer.service');
    const lpEvents = events.filter(event => isLpEventType(event.eventType));
    if (lpEvents.length > 0) {
       await processLpEvents(lpEvents);
