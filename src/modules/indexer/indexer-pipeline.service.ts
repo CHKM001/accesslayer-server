@@ -356,6 +356,13 @@ export async function processIndexerEvents(
          await import('./invoice-protocol-indexer.service');
       await processInvoiceProtocolEvents(invoiceEvents);
    }
+   const spotlightBidEvents = events.filter(event =>
+      ['SpotlightBidPlaced', 'SPOTLIGHT_BID_PLACED', 'SpotlightAwarded', 'SPOTLIGHT_AWARDED'].includes(event.eventType)
+   );
+   if (spotlightBidEvents.length > 0) {
+      const { processSpotlightBidEvents } = await import('./spotlight-bid-indexer.service');
+      await processSpotlightBidEvents(spotlightBidEvents);
+   }
    const tradeEvents = events.filter(isTradeEvent);
    const dividendEvents = events.filter(
       event =>
