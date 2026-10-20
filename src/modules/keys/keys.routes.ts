@@ -128,6 +128,10 @@ import {
    calculateEffectiveWeight,
 } from '../staking/staking.service';
 import { getKeyCurveMilestones } from './key-milestones.service';
+import { getPendingCurveUpdates, getCurveUpdateHistory } from './curve-updates.service';
+import { getKeyHolderMilestones } from './holder-milestones.service';
+import { getKeyRetirement, getKeyRetirementHistory } from './key-retirement.service';
+import { getKeyLaunchAuction, getKeyLaunchAuctionBids } from './key-launch-auction.service';
 import { getSunsetWatchList } from './key-sunset-watch.service';
 import {
    getKeyPaymentAssetAnalytics,
