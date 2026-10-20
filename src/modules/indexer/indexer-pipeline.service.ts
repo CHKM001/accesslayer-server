@@ -427,6 +427,44 @@ export async function processIndexerEvents(
       await processGovernanceProposalEvents(governanceEvents);
    }
 
+   const { CURVE_UPDATE_EVENT_TYPES, processCurveUpdateEvents } =
+      await import('./curve-update-indexer.service');
+   const curveUpdateEvents = events.filter(event =>
+      CURVE_UPDATE_EVENT_TYPES.has(event.eventType)
+   );
+   if (curveUpdateEvents.length > 0) {
+      await processCurveUpdateEvents(curveUpdateEvents);
+   }
+
+   const {
+      MILESTONE_REWARD_CLAIMED_EVENT_TYPES,
+      processMilestoneRewardClaimedEvents,
+   } = await import('./milestone-claim-indexer.service');
+   const milestoneClaimEvents = events.filter(event =>
+      MILESTONE_REWARD_CLAIMED_EVENT_TYPES.has(event.eventType)
+   );
+   if (milestoneClaimEvents.length > 0) {
+      await processMilestoneRewardClaimedEvents(milestoneClaimEvents);
+   }
+
+   const { KEY_RETIREMENT_EVENT_TYPES, processKeyRetirementEvents } =
+      await import('./key-retirement-indexer.service');
+   const retirementEvents = events.filter(event =>
+      KEY_RETIREMENT_EVENT_TYPES.has(event.eventType)
+   );
+   if (retirementEvents.length > 0) {
+      await processKeyRetirementEvents(retirementEvents);
+   }
+
+   const { KEY_LAUNCH_AUCTION_EVENT_TYPES, processKeyLaunchAuctionEvents } =
+      await import('./key-launch-auction-indexer.service');
+   const launchAuctionEvents = events.filter(event =>
+      KEY_LAUNCH_AUCTION_EVENT_TYPES.has(event.eventType)
+   );
+   if (launchAuctionEvents.length > 0) {
+      await processKeyLaunchAuctionEvents(launchAuctionEvents);
+   }
+
    if (tradeEvents.length > 0) {
       await processTradeEvents(tradeEvents, { advanceCursor: false });
    }

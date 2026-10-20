@@ -128,6 +128,10 @@ import {
    calculateEffectiveWeight,
 } from '../staking/staking.service';
 import { getKeyCurveMilestones } from './key-milestones.service';
+import { getPendingCurveUpdates, getCurveUpdateHistory } from './curve-updates.service';
+import { getKeyHolderMilestones } from './holder-milestones.service';
+import { getKeyRetirement, getKeyRetirementHistory } from './key-retirement.service';
+import { getKeyLaunchAuction, getKeyLaunchAuctionBids } from './key-launch-auction.service';
 import { getSunsetWatchList } from './key-sunset-watch.service';
 import {
    getKeyPaymentAssetAnalytics,
@@ -241,6 +245,11 @@ const keyPriceQuerySchema = z.object({
       .min(1, 'quantity must be at least 1')
       .max(1_000_000, 'quantity must be at most 1,000,000')
       .default(1),
+});
+
+const launchAuctionBidsQuerySchema = z.object({
+   page: z.coerce.number().int().min(1).default(1),
+   limit: z.coerce.number().int().min(1).max(100).default(20),
 });
 
 const router = Router();
@@ -867,6 +876,84 @@ router.get('/:keyId/curve-config', async (req, res, next) => {
          milestones: (creator.curveMilestones as any) ?? [],
          baseExponent: creator.baseExponent ?? 1,
       });
+   } catch (error) {
+      next(error);
+   }
+});
+
+router.get('/:keyId/curve-updates/pending', async (req, res, next) => {
+   try {
+      sendSuccess(res, await getPendingCurveUpdates(String(req.params.keyId)));
+   } catch (error) {
+      next(error);
+   }
+});
+
+router.get('/:keyId/curve-updates/history', async (req, res, next) => {
+   try {
+      sendSuccess(res, await getCurveUpdateHistory(String(req.params.keyId)));
+   } catch (error) {
+      next(error);
+   }
+});
+
+router.get('/:keyId/milestones/:wallet', async (req, res, next) => {
+   try {
+      sendSuccess(
+         res,
+         await getKeyHolderMilestones(
+            String(req.params.keyId),
+            String(req.params.wallet)
+         )
+      );
+   } catch (error) {
+      next(error);
+   }
+});
+
+router.get('/:keyId/retirement', async (req, res, next) => {
+   try {
+      sendSuccess(res, await getKeyRetirement(String(req.params.keyId)));
+   } catch (error) {
+      next(error);
+   }
+});
+
+router.get('/:keyId/retirement/history', async (req, res, next) => {
+   try {
+      sendSuccess(res, await getKeyRetirementHistory(String(req.params.keyId)));
+   } catch (error) {
+      next(error);
+   }
+});
+
+router.get('/:keyId/auction', async (req, res, next) => {
+   try {
+      const result = await getKeyLaunchAuction(String(req.params.keyId));
+      if (!result) return sendNotFound(res, 'Auction');
+      sendSuccess(res, result);
+   } catch (error) {
+      next(error);
+   }
+});
+
+router.get('/:keyId/auction/bids', async (req, res, next) => {
+   const parsed = launchAuctionBidsQuerySchema.safeParse(req.query);
+   if (!parsed.success) {
+      return sendValidationError(
+         res,
+         'Invalid pagination',
+         zodIssuesToDetails(parsed.error.issues)
+      );
+   }
+   try {
+      const result = await getKeyLaunchAuctionBids(
+         String(req.params.keyId),
+         parsed.data.page,
+         parsed.data.limit
+      );
+      if (!result) return sendNotFound(res, 'Auction');
+      sendSuccess(res, result);
    } catch (error) {
       next(error);
    }
